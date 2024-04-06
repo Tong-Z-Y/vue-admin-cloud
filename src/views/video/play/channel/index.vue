@@ -60,6 +60,7 @@
       :auth="userStore.getToken"
       :audio-push-api="doAudioPushPath"
       :broadcast-api="doPlayBroadcast"
+      :stop-push-api="doStopAudioPush"
       @cancel="handleSuccess"
     />
   </PageWrapper>
@@ -86,8 +87,8 @@
   import { useRoute } from 'vue-router';
   import { DEVICE_TYPE_ENUM, PTZ_TYPE_ENUM } from '@/enums/commonEnum';
   import { doPlayStart, doPlayStop } from '@/api/video/paly';
-  import { doDeviceChannelPage, doDelDeviceChannel } from '@/api/video/deviceChannel';
-  import { doAudioPushPath, doPlayBroadcast } from '@/api/video/audioPush';
+  import { doDeviceChannelPage, doDelDeviceChannel} from '@/api/video/deviceChannel';
+  import { doAudioPushPath, doPlayBroadcast ,doStopAudioPush } from '@/api/video/audioPush';
   import DeviceChannelDrawer from './DeviceChannelDrawer.vue';
   import { PlayModel } from '@/components/Video/index';
   import { useUserStoreWithOut } from '@/store/modules/user';
@@ -129,7 +130,7 @@
       accordion: false,
       rowField: 'channelId',
       parentField: 'parentId',
-      children: 'children',
+      childrenField: 'children',
     },
     proxyConfig: {
       props: {

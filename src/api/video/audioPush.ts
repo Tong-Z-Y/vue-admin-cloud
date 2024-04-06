@@ -5,6 +5,8 @@ enum Api {
   findAudioPushPath = '/webapi/video/audio/push/audio_push_path',
   //语音广播命令
   broadcast = '/webapi/video/audio/push/broadcast',
+  //停止推流
+  stopAudioPush = '/webapi/video/audio/push/stop_audio_push',
 }
 
 export function doAudioPushPath(params: Recordable) {
@@ -14,3 +16,7 @@ export function doAudioPushPath(params: Recordable) {
 export function doPlayBroadcast(params: Recordable) {
   return defHttp.get({ url: Api.broadcast, params });
 }
+export function doStopAudioPush(params: Recordable) {
+  return defHttp.get({ url: Api.stopAudioPush, params });
+}
+

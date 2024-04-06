@@ -7,7 +7,7 @@
     title="播放器"
     @cancel="handleCancel"
     width="1200px"
-    :footer="null"
+    :footer="false"
   >
     <div :class="` ${prefixCls} flex flex-row gap-x-px `">
       <div
@@ -425,12 +425,18 @@
       type: Function as PropType<PromiseFn>,
       default: null,
     },
+    //广播推流注销
+    stopPushApi: {
+      type: Function as PropType<PromiseFn>,
+      default: null,
+    },
   });
   const stats = reactive({
     //视频相关
     selectPlay: 'Jessibuca', //选择的播放器
     playType: 'wsFlv', //默认播放地址
     playing: true, //播放状态
+    localSteam : 0,
     options: [
       {
         label: 'Jessibuca',
@@ -568,6 +574,9 @@
             stats.audioTimeout = null;
             //注销对讲器
             destroy();
+            if (isFunction(props.audioPushApi)) {
+              props.stopPushApi({ deviceId: stats.deviceId,channelId: stats.channelId,})
+            }
             createMessage.error('语音组件加载失败，请检查...');
           }, 5000);
         }
@@ -586,6 +595,9 @@
       pushStats.zlmsdpUrl = '';
       //销毁对讲
       destroy();
+      if (isFunction(props.audioPushApi)) {
+        props.stopPushApi({ deviceId: stats.deviceId,channelId: stats.channelId,})
+      }
       createMessage.success('语音对讲已关闭。');
     }
   };
@@ -595,40 +607,50 @@
     if (!isFunction(props.broadcastApi)) {
       return;
     }
-    if (!unref(localSteam)) {
+    stats.localSteam = unref(localSteam);
+    if (unref(localSteam) != 2) {
       if (!stats.broadcastTimer) {
-        stats.broadcastTimer = setInterval(() => initBroadcast(), 500);
-        stats.broadcastTimeout = setTimeout(() => {
+        stats.broadcastTimer = setInterval(initBroadcast, 500);
+        stats.broadcastTimeout = setTimeout(()=>{
           stats.broadcastTimer && clearInterval(stats.broadcastTimer);
           stats.broadcastTimer = null;
           stats.broadcastTimeout && clearInterval(stats.broadcastTimeout);
           stats.broadcastTimeout = null;
           //注销对讲器
           destroy();
+          if (isFunction(props.audioPushApi)) {
+            props.stopPushApi({ deviceId: stats.deviceId,channelId: stats.channelId,})
+          }
           stats.onAudio = 0;
           pushStats.zlmsdpUrl = '';
-          createMessage.error('语音对讲开启失败，请检查是否有麦克风....');
+          if(stats.localSteam == 0){
+            createMessage.error('语音对讲开启失败，请检查是否有麦克风....');
+          }else{
+            createMessage.error('语音对讲初始化失败，请联系管理员....');
+          }
         }, 5000);
       }
-      return;
     } else {
       stats.broadcastTimer && clearInterval(stats.broadcastTimer);
       stats.broadcastTimer = null;
       stats.broadcastTimeout && clearInterval(stats.broadcastTimeout);
       stats.broadcastTimeout = null;
-      props
-        .broadcastApi({ deviceId: stats.deviceId, channelId: stats.channelId })
-        .then(() => {
-          stats.onAudio = 2;
-          createMessage.success('语音对讲开启成功');
-        })
-        .catch((error) => {
-          //注销对讲器
-          destroy();
-          stats.onAudio = 0;
-          pushStats.zlmsdpUrl = '';
-          createMessage.error('语音对讲开启失败,语音流推送失败');
-        });
+      props.broadcastApi({ deviceId: stats.deviceId, channelId: stats.channelId })
+      .then(() => {
+        stats.onAudio = 2;
+        createMessage.success('语音对讲开启成功');
+      })
+      .catch((error) => {
+        //注销对讲器
+        destroy();
+        if (isFunction(props.audioPushApi)) {
+          props.stopPushApi({ deviceId: stats.deviceId,channelId: stats.channelId,})
+        }
+        stats.onAudio = 0;
+        stats.localSteam = 0;
+        pushStats.zlmsdpUrl = '';
+        createMessage.error('语音对讲开启失败,语音流推送失败');
+      });
     }
   };
 

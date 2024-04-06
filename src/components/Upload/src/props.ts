@@ -4,7 +4,8 @@ import { FileBasicColumn } from './types/typing';
 import type { Options } from 'sortablejs';
 
 import { Merge } from '@/utils/types';
-import { string } from 'vue-types';
+import { propTypes } from '@/utils/propTypes';
+import { BasicColumn } from '@/components/Table';
 
 type SortableOptions = Merge<
   Omit<Options, 'onEnd'>,
@@ -13,6 +14,19 @@ type SortableOptions = Merge<
     // ...可扩展
   }
 >;
+
+export const previewType = {
+  previewColumns:{
+    type: Array as (PropType<BasicColumn[] | FileBasicColumn[]>),
+    default: [],
+    required: false,
+  },
+  beforePreviewData:{
+    type: Function as PropType<(arg:string[])=>Recordable<any>>,
+    default: null,
+    required: false,
+  },
+}
 
 type ListType = 'text' | 'picture' | 'picture-card';
 
@@ -59,25 +73,24 @@ export const basicProps = {
   },
   filename: {
     type: String as PropType<string>,
-    default: undefined,
+    default: null,
   },
   fileListOpenDrag: {
     type: Boolean,
     default: true,
   },
-  prefix:{
-    type : [String ,Boolean],
-    default : ()=> false,
-  },
+
   fileListDragOptions: {
     type: Object as PropType<SortableOptions>,
     default: () => ({}),
   },
+  // support xxx.xxx.xx
+  resultField: propTypes.string.def('path'),
 };
 
 export const uploadContainerProps = {
   value: {
-    type: [ String ,  Array ] as PropType<string[]>,
+    type: Array as (PropType<string[]>),
     default: () => [],
   },
   ...basicProps,
@@ -89,22 +102,20 @@ export const uploadContainerProps = {
     type: Boolean as PropType<boolean>,
     default: false,
   },
+  ...previewType
 };
 
 export const previewProps = {
-  prefix:{
-    type : [String ,Boolean],
-    default : ()=> false,
-  },
   value: {
     type: Array as PropType<string[]>,
     default: () => [],
   },
+  ...previewType
 };
 
 export const fileListProps = {
   columns: {
-    type: Array as PropType<FileBasicColumn[]>,
+    type: Array as (PropType<BasicColumn[] | FileBasicColumn[]> ),
     default: null,
   },
   actionColumn: {

@@ -37,12 +37,12 @@
   import { uploadContainerProps } from '../props';
   import { isImgTypeByName } from '../helper';
   import { UploadResultStatus } from '@/components/Upload/src/types/typing';
-
+  import { get,omit } from 'lodash-es';
   defineOptions({ name: 'ImageUpload' });
 
   const emit = defineEmits(['change', 'update:value', 'delete']);
   const props = defineProps({
-    ...uploadContainerProps,
+    ...omit(uploadContainerProps,["previewColumns","beforePreviewData"]),
   });
   const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -82,8 +82,7 @@
               uid: -i + '',
               name: item.substring(item.lastIndexOf('/') + 1),
               status: 'done',
-              url: props.prefix?props.prefix + item:item,
-              path: item,
+              url: item,
             };
           } else if (item && isObject(item)) {
             return item;
@@ -92,6 +91,10 @@
           }
         }) as UploadProps['fileList'];
       }
+    },
+    {
+      immediate: true,
+      deep: true,
     },
   );
 
@@ -122,6 +125,7 @@
       index !== -1 && fileList.value.splice(index, 1);
       const value = getValue();
       isInnerOperate.value = true;
+      emit('update:value', value);
       emit('change', value);
       emit('delete', file);
     }
@@ -165,9 +169,15 @@
         [props.name]: info.file,
         filename: props.filename,
       });
-      await info.onSuccess!(res);
+      if(props.resultField){
+        info.onSuccess!(res);
+      }else{
+        // 不传入 resultField 的情况
+        info.onSuccess!(res.data);
+      }
       const value = getValue();
       isInnerOperate.value = true;
+      emit('update:value', value);
       emit('change', value);
     } catch (e: any) {
       console.log(e);
@@ -179,6 +189,9 @@
     const list = (fileList.value || [])
       .filter((item) => item?.status === UploadResultStatus.DONE)
       .map((item: any) => {
+        if(props.resultField){
+          return get(item?.response, props.resultField)
+        }
         return item?.path || item?.response?.path;
       });
     return props.multiple ? list : list.length > 0 ? list[0] : '';

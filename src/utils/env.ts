@@ -71,7 +71,6 @@ export function getEnv(): string {
  * @example:
  */
 export function isDevMode(): boolean {
-  console.log(import.meta.env);
   return import.meta.env.DEV;
 }
 

@@ -12,7 +12,8 @@ var ZLMRTCClient = (function (exports) {
 	  WEBRTC_ON_DATA_CHANNEL_CLOSE: 'WEBRTC_ON_DATA_CHANNEL_CLOSE',
 	  WEBRTC_ON_DATA_CHANNEL_ERR: 'WEBRTC_ON_DATA_CHANNEL_ERR',
 	  WEBRTC_ON_DATA_CHANNEL_MSG: 'WEBRTC_ON_DATA_CHANNEL_MSG',
-	  CAPTURE_STREAM_FAILED: 'CAPTURE_STREAM_FAILED'
+	  CAPTURE_STREAM_FAILED: 'CAPTURE_STREAM_FAILED',
+		WEBRTC_ON_INIT_STAUTS: 'WEBRTC_ON_INIT_STAUTS'
 	};
 
 	const VERSION$1 = '1.0.1';
@@ -7894,11 +7895,14 @@ var ZLMRTCClient = (function (exports) {
 	          anwser.type = 'answer';
 	          log(this.TAG, 'answer:', ret.sdp);
 	          this.pc.setRemoteDescription(anwser).then(() => {
+							this.dispatch(Events$1.WEBRTC_ON_INIT_STAUTS);
 	            log(this.TAG, 'set remote sucess');
 	          }).catch(e => {
 	            error(this.TAG, e);
 	          });
-	        });
+	        }).catch(e => {
+						error(this.TAG, e);
+					});
 	      });
 	    }).catch(e => {
 	      error(this.TAG, e);
@@ -7998,11 +8002,14 @@ var ZLMRTCClient = (function (exports) {
 	            anwser.type = 'answer';
 	            log(this.TAG, 'answer:', ret.sdp);
 	            this.pc.setRemoteDescription(anwser).then(() => {
+								this.dispatch(Events$1.WEBRTC_ON_INIT_STAUTS);
 	              log(this.TAG, 'set remote sucess');
 	            }).catch(e => {
 	              error(this.TAG, e);
 	            });
-	          });
+	          }).catch(e => {
+							error(this.TAG, e);
+						});
 	        });
 	      }).catch(e => {
 	        error(this.TAG, e);

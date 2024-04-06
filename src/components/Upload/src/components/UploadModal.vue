@@ -66,6 +66,7 @@
   import { warn } from '@/utils/log';
   import FileList from './FileList.vue';
   import { useI18n } from '@/hooks/web/useI18n';
+  import { get } from 'lodash-es';
 
   const props = defineProps({
     ...basicProps,
@@ -188,6 +189,14 @@
       );
       item.status = UploadResultStatus.SUCCESS;
       item.response = ret;
+      if (props.resultField) {
+        // 适配预览组件而进行封装
+        item.response = {
+          code: 0,
+          message: 'upload Success!',
+          url: get(ret, props.resultField),
+        };
+      }
       return {
         success: true,
         error: null,
@@ -243,7 +252,7 @@
     for (const item of fileListRef.value) {
       const { status, response } = item;
       if (status === UploadResultStatus.SUCCESS && response) {
-        fileList.push(response.path);
+        fileList.push(response.url);
       }
     }
     // 存在一个上传成功的即可保存

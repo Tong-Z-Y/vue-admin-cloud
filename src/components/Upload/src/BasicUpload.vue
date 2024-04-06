@@ -31,10 +31,11 @@
 
     <UploadPreviewModal
       :value="fileList"
-      :prefix ="props.prefix"
       @register="registerPreviewModal"
       @list-change="handlePreviewChange"
       @delete="handlePreviewDelete"
+      v-bind:preview-columns="props.previewColumns"
+      v-bind:before-preview-data="props.beforePreviewData"
     />
   </div>
 </template>

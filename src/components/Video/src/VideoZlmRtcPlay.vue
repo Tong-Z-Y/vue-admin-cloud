@@ -12,6 +12,7 @@
 <script lang="ts" setup>
   import { useDesign } from '@/hooks/web/useDesign';
   import { ref, reactive, onUnmounted, watch } from 'vue';
+  import { isDevMode } from '@/utils/env';
   import { useZlmRtc } from './useZlmRtc';
   const containerRef = ref();
   const { prefixCls } = useDesign('video-rtp-play');
@@ -25,15 +26,17 @@
 
   const use = reactive({
     zlmsdpUrl: props.videoUrl,
+    debug:isDevMode(),
   });
 
   const { play, destroy } = useZlmRtc(use, containerRef);
-
+  
   watch(
     () => props.videoUrl,
     () => {
       use.zlmsdpUrl = props.videoUrl;
     },
+    { immediate: true, deep: true },
   );
 
   onUnmounted(() => {

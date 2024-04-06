@@ -16,13 +16,12 @@ export interface FileItem {
   percent: number;
   file: File;
   status?: UploadResultStatus;
-  response?: UploadApiResult;
+  response?: UploadApiResult | Recordable<any>;
   uuid: string;
 }
 
 export interface PreviewFileItem {
-  fullPath: string;
-  path: string;
+  url: string;
   name: string;
   type: string;
 }

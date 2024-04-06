@@ -96,8 +96,8 @@ export function createPreviewColumns(): BasicColumn[] {
       title: t('component.upload.legend'),
       width: 100,
       customRender: ({ record }) => {
-        const { fullPath } = (record as PreviewFileItem) || {};
-        return isImgTypeByName(fullPath) && <ThumbUrl fileUrl={fullPath} />;
+        const { url } = (record as PreviewFileItem) || {};
+        return isImgTypeByName(url) && <ThumbUrl fileUrl={url} />;
       },
     },
     {
