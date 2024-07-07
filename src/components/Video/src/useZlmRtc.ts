@@ -37,7 +37,7 @@ export function useZlmRtc(rtcProps: RtcProps, container?: Ref) {
             zlmsdpUrl: '', //播放流地址
             debug: false, // 是否打印日志
             simulcast: false,// 是否联播
-            useCamera: false,//是否使用相机
+            useCamera: false,//是否使用摄像头 负责录音
             audioEnable: true,//是否开启视频
             videoEnable: true,//是否开启音频
             recvOnly: true,//是否仅cv模式
@@ -153,6 +153,7 @@ export function useZlmRtc(rtcProps: RtcProps, container?: Ref) {
     }
     zlmRtcClient.close();
     zlmRtcClient = null;
+    rtcProps.zlmsdpUrl = "";
   };
 
   watch(

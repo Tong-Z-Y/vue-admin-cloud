@@ -80,11 +80,10 @@
   const use = reactive({
     videoUrl: props.videoUrl,
     options: {},
-    hasAudio: true,
+    hasAudio: props.hasAudio,
     isMute: false,
   });
-  const { stats, play, pause, refresh, screenshot, onMute, fullscreenSwich, destroy } =
-    useJessibuca(containerRef, use);
+  const { stats, play, pause, refresh, screenshot, onMute, fullscreenSwich, destroy } = useJessibuca(containerRef, use);
   watch(
     () => props.videoUrl,
     () => {

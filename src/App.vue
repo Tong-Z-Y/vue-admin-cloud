@@ -9,7 +9,7 @@
 <script lang="ts" setup>
   import { AppProvider } from '@/components/Application';
   import { useTitle } from '@/hooks/web/useTitle';
-  import { useSocket } from '@/hooks/socket';
+  import { useInitSocket } from '@/hooks/socket';
   import { useLocale } from '@/locales/useLocale';
   import { ConfigProvider } from 'ant-design-vue';
 
@@ -38,6 +38,6 @@
   );
   // Listening to page changes and dynamically changing site titles
   useTitle();
-  //webSocket
-  useSocket();
+  //webInitSocket
+  useInitSocket();
 </script>

@@ -2,7 +2,7 @@
   <video
     :class="`${prefixCls} relative w-full h-full m-auto `"
     controls
-    muted
+    :muted="props.muted"
     id="containerRef"
     ref="containerRef"
   >
@@ -22,11 +22,28 @@
       type: String,
       default: null,
     },
+    //是否开启视频
+    audioEnable: {
+      type: Boolean,
+      default: true,
+    },
+    //是否开启音频
+    videoEnable: {
+      type: Boolean,
+      default: true,
+    },
+    //是否开启音频
+    muted: {
+      type: Boolean,
+      default: true,
+    },
   });
 
   const use = reactive({
     zlmsdpUrl: props.videoUrl,
     debug:isDevMode(),
+    audioEnable: props.audioEnable,//是否开启视频
+    videoEnable: props.videoEnable,//是否开启音频
   });
 
   const { play, destroy } = useZlmRtc(use, containerRef);

@@ -1,18 +1,17 @@
 import { Socket } from 'socket.io-client';
-import { SocketModel, Namespace } from '../common';
+import { SocketModel, Namespace } from '../../common';
 import { SocketNamespace, SocketOutEvent } from '@/enums/SocketEnum';
 import rootSocketEmitter from '@/hooks/socket/rootSocketEmitter';
 
-class LoginQrNamespace implements Namespace {
+class PublicMemberNamespace implements Namespace {
   private socket: Socket;
   private readonly namespace: SocketNamespace;
   private readonly token: Boolean;
 
   constructor() {
-    this.namespace = SocketNamespace.QR_NAMESPACE;
-    this.token = false;
+    this.namespace = SocketNamespace.PUBLIC_MEMBER_NAMESPACE;
+    this.token = true;
   }
-
   //获取当前类参数
   getParam(): SocketModel {
     return {
@@ -29,18 +28,13 @@ class LoginQrNamespace implements Namespace {
   getSocket() {
     return this.socket;
   }
+
   private setEvent() {
     if (!this.socket) return;
-    this.socket.on(SocketOutEvent.OUT_LOGIN_QR_CODE_EVENT, (data) => {
-      rootSocketEmitter.emit(SocketOutEvent.OUT_LOGIN_QR_CODE_EVENT, data);
-    });
-    this.socket.on(SocketOutEvent.OUT_LOGIN_INFO_EVENT, (data) => {
-      rootSocketEmitter.emit(SocketOutEvent.OUT_LOGIN_INFO_EVENT, data);
-    });
-    this.socket.on(SocketOutEvent.OUT_LOGIN_BIND_EVENT, (data) => {
-      rootSocketEmitter.emit(SocketOutEvent.OUT_LOGIN_BIND_EVENT, data);
+    //监听事件
+    this.socket.on(SocketOutEvent.PUBLIC_MEMBER_EVENT, (data) => {
+      rootSocketEmitter.emit(SocketOutEvent.PUBLIC_MEMBER_EVENT, data);
     });
   }
 }
-
-export default LoginQrNamespace;
+export default PublicMemberNamespace;
