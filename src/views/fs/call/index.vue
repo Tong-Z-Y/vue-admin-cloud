@@ -216,7 +216,7 @@
       createMessage.info(message);
     });
 
-    //客服推流地址回调
+    //客服推流成功回调
     rootSocketEmitter.on(SocketOutEvent.AGENT_OUT_PUSH_PATH, (val) => {
       const { code, message } = val as Recordable;
       if (code != ResultEnum.SUCCESS) {
@@ -234,22 +234,7 @@
         type:pushStats.videoEnable?'CALL_VIDEO_PHONE':'CALL_AUDIO_PHONE',
       });
     });
-
-    //客服推流关闭回调
-    rootSocketEmitter.on(SocketOutEvent.AGENT_OUT_PUSH_PATH_LOGOUT, (val) => {
-      const { code, message } = val as Recordable;
-      if (code != ResultEnum.SUCCESS) {
-        stats.status = 1;//拨打电话
-        stats.zlmAudioRtcUrl = '';
-        stats.zlmVideoRtcUrl = '';
-        destroy();
-        createMessage.error(message || '获取消息错误');
-        return;
-      }
-      createMessage.info('推流已关闭');
-      hangUp();
-    });
-    //推流回调
+    //客服拨打电话回调
     rootSocketEmitter.on(SocketOutEvent.AGENT_OUT_CALL_PHONE, (val) => {
       const { code, message, data } = val as Recordable;
       if (code != ResultEnum.SUCCESS) {
