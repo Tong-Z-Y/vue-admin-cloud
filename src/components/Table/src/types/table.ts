@@ -114,6 +114,7 @@ export interface TableActionType {
   getDataSource: <T = Recordable>() => T[];
   getSearchParam: () => Recordable;
   getRawDataSource: <T = Recordable>() => T;
+  getSearchInfo: <T = Recordable>() => T;
   setLoading: (loading: boolean) => void;
   setProps: (props: Partial<BasicTableProps>) => void;
   redoHeight: () => void;

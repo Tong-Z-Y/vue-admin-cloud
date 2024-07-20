@@ -8,10 +8,7 @@ const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const DATE_FORMAT = 'YYYY-MM-DD';
 export { DATE_TIME, DATE_TIME_FORMAT, DATE_FORMAT };
 
-export function formatToDateTime(
-  date?: dayjs.ConfigType | string,
-  format = DATE_TIME_FORMAT,
-): string {
+export function formatToDateTime(date?: dayjs.ConfigType, format = DATE_TIME_FORMAT): string {
   return dayjs(date).format(format);
 }
 

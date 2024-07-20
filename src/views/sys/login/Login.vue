@@ -49,19 +49,18 @@
   </div>
 </template>
 <script lang="ts" setup>
+  import { AppDarkModeToggle, AppLocalePicker, AppLogo } from '@/components/Application';
+  import { useGlobSetting } from '@/hooks/setting';
+  import { useDesign } from '@/hooks/web/useDesign';
+  import { useI18n } from '@/hooks/web/useI18n';
+  import { useLocaleStore } from '@/store/modules/locale';
   import { computed } from 'vue';
-  import { AppLogo } from '@/components/Application';
-  import { AppLocalePicker, AppDarkModeToggle } from '@/components/Application';
-  import LoginForm from './LoginForm.vue';
-  import WxMiniForm from './WxMiniForm.vue';
   import ForgetPasswordForm from './ForgetPasswordForm.vue';
-  import RegisterForm from './RegisterForm.vue';
+  import LoginForm from './LoginForm.vue';
   import MobileForm from './MobileForm.vue';
   import QrCodeForm from './QrCodeForm.vue';
-  import { useGlobSetting } from '@/hooks/setting';
-  import { useI18n } from '@/hooks/web/useI18n';
-  import { useDesign } from '@/hooks/web/useDesign';
-  import { useLocaleStore } from '@/store/modules/locale';
+  import WxMiniForm from './WxMiniForm.vue';
+  import RegisterForm from './RegisterForm.vue';
 
   defineProps({
     sessionTimeout: {
@@ -206,6 +205,10 @@
       @media (max-width: @screen-sm) {
         min-width: 160px;
       }
+    }
+
+    .@{countdown-prefix-cls} input {
+      min-width: unset;
     }
   }
 </style>

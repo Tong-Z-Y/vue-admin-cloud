@@ -50,8 +50,7 @@ export function useDataSource(
   });
   const dataSourceRef = ref<Recordable[]>([]);
   const rawDataSourceRef = ref<Recordable>({});
-
-  const searchParam = ref<Recordable>({});
+  const searchInfoRef = ref<Recordable>({});
 
   watchEffect(() => {
     tableData.value = unref(dataSourceRef);
@@ -115,32 +114,41 @@ export function useDataSource(
     return unref(getAutoCreateKey) ? ROW_KEY : rowKey;
   });
 
-  const getDataSourceRef = computed(() => {
-    const dataSource = unref(dataSourceRef);
-    if (!dataSource || dataSource.length === 0) {
-      return unref(dataSourceRef);
-    }
-    if (unref(getAutoCreateKey)) {
-      const firstItem = dataSource[0];
-      const lastItem = dataSource[dataSource.length - 1];
+  const getDataSourceRef: Ref<Recordable<any>[]> = ref([]);
 
-      if (firstItem && lastItem) {
-        if (!firstItem[ROW_KEY] || !lastItem[ROW_KEY]) {
-          const data = cloneDeep(unref(dataSourceRef));
-          data.forEach((item) => {
-            if (!item[ROW_KEY]) {
-              item[ROW_KEY] = buildUUID();
-            }
-            if (item.children && item.children.length) {
-              setTableKey(item.children);
-            }
-          });
-          dataSourceRef.value = data;
+  watch(
+    () => dataSourceRef.value,
+    () => {
+      const dataSource = unref(dataSourceRef);
+      if (!dataSource || dataSource.length === 0) {
+        getDataSourceRef.value = unref(dataSourceRef);
+      }
+      if (unref(getAutoCreateKey)) {
+        const firstItem = dataSource[0];
+        const lastItem = dataSource[dataSource.length - 1];
+
+        if (firstItem && lastItem) {
+          if (!firstItem[ROW_KEY] || !lastItem[ROW_KEY]) {
+            const data = cloneDeep(unref(dataSourceRef));
+            data.forEach((item) => {
+              if (!item[ROW_KEY]) {
+                item[ROW_KEY] = buildUUID();
+              }
+              if (item.children && item.children.length) {
+                setTableKey(item.children);
+              }
+            });
+            dataSourceRef.value = data;
+          }
         }
       }
-    }
-    return unref(dataSourceRef);
-  });
+      getDataSourceRef.value = unref(dataSourceRef);
+    },
+    {
+      deep: true,
+      immediate: true,
+    },
+  );
 
   async function updateTableData(index: number, key: Key, value: any) {
     const record = dataSourceRef.value[index];
@@ -281,6 +289,7 @@ export function useDataSource(
       if (beforeFetch && isFunction(beforeFetch)) {
         params = (await beforeFetch(params)) || params;
       }
+      searchInfoRef.value = params;
       const res = await api(params);
       rawDataSourceRef.value = res;
 
@@ -348,6 +357,10 @@ export function useDataSource(
     return await fetch(opt);
   }
 
+  function getSearchInfo<T = Recordable>() {
+    return searchInfoRef.value as T;
+  }
+
   onMounted(() => {
     useTimeoutFn(() => {
       unref(propsRef).immediate && fetch();
@@ -355,10 +368,12 @@ export function useDataSource(
   });
 
   return {
-    getDataSourceRef,
+    getDataSourceRef: computed(() => getDataSourceRef.value),
     getDataSource,
     getSearchParam,
     getRawDataSource,
+    searchInfoRef,
+    getSearchInfo,
     getRowKey,
     setTableData,
     getAutoCreateKey,

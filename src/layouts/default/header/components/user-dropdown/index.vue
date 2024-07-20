@@ -54,7 +54,6 @@
   <TenantAction @register="registerTenantAction" :isSysTenant="isSysTenant" />
 </template>
 <script lang="ts" setup>
-  // components
   import { Dropdown, Menu, MenuDivider } from 'ant-design-vue';
   import type { MenuInfo } from 'ant-design-vue/lib/menu/src/interface';
 

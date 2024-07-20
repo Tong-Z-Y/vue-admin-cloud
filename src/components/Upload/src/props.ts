@@ -1,5 +1,5 @@
 import type { PropType } from 'vue';
-import { FileBasicColumn } from './types/typing';
+import { BaseFileItem, FileBasicColumn } from './types/typing';
 
 import type { Options } from 'sortablejs';
 
@@ -14,23 +14,29 @@ type SortableOptions = Merge<
     // ...可扩展
   }
 >;
-
+export type handleFnKey = 'record' | 'valueKey' | 'uidKey';
+export type previewColumnsFnType = {
+  handleRemove: (record: Record<handleFnKey, any>) => any;
+  handleAdd: (record: Record<handleFnKey, any>) => any;
+};
 export const previewType = {
-  previewColumns:{
-    type: Array as (PropType<BasicColumn[] | FileBasicColumn[]>),
-    default: [],
+  previewColumns: {
+    type: [Array, Function] as PropType<
+      BasicColumn[] | ((arg: previewColumnsFnType) => BasicColumn[])
+    >,
     required: false,
   },
-  beforePreviewData:{
-    type: Function as PropType<(arg:string[])=>Recordable<any>>,
+  beforePreviewData: {
+    type: Function as PropType<(arg: BaseFileItem[] | any) => Recordable<any>>,
     default: null,
     required: false,
   },
-}
+};
 
 type ListType = 'text' | 'picture' | 'picture-card';
 
 export const basicProps = {
+  disabled: { type: Boolean, default: false },
   listType: {
     type: String as PropType<ListType>,
     default: 'picture-card',
@@ -85,12 +91,12 @@ export const basicProps = {
     default: () => ({}),
   },
   // support xxx.xxx.xx
-  resultField: propTypes.string.def('path'),
+  resultField: propTypes.string.def(''),
 };
 
 export const uploadContainerProps = {
   value: {
-    type: Array as (PropType<string[]>),
+    type: Array as PropType<string[]>,
     default: () => [],
   },
   ...basicProps,
@@ -102,20 +108,24 @@ export const uploadContainerProps = {
     type: Boolean as PropType<boolean>,
     default: false,
   },
-  ...previewType
+  ...previewType,
 };
 
 export const previewProps = {
   value: {
-    type: Array as PropType<string[]>,
+    type: Array as PropType<BaseFileItem[] | any[]>,
     default: () => [],
   },
-  ...previewType
+  maxNumber: {
+    type: Number as PropType<number>,
+    default: 1,
+  },
+  ...previewType,
 };
 
 export const fileListProps = {
   columns: {
-    type: Array as (PropType<BasicColumn[] | FileBasicColumn[]> ),
+    type: Array as PropType<BasicColumn[] | FileBasicColumn[]>,
     default: null,
   },
   actionColumn: {
