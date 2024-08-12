@@ -46,11 +46,11 @@ class FsCallNamespace implements Namespace {
     this.socket.on(SocketOutEvent.AGENT_OUT_CALL_PHONE, (data) => {
       rootSocketEmitter.emit(SocketOutEvent.AGENT_OUT_CALL_PHONE, data);
     });
-    this.socket.on(SocketOutEvent.AGENT_OUT_ANSWER_PHONE, (data) => {
-      rootSocketEmitter.emit(SocketOutEvent.AGENT_OUT_ANSWER_PHONE, data);
-    });
     this.socket.on(SocketOutEvent.AGENT_OUT_HANG_UP_PHONE, (data) => {
       rootSocketEmitter.emit(SocketOutEvent.AGENT_OUT_HANG_UP_PHONE, data);
+    });
+    this.socket.on(SocketOutEvent.AGENT_OUT_PHONE_NOTIFICATION, (data) => {
+      rootSocketEmitter.emit(SocketOutEvent.AGENT_OUT_PHONE_NOTIFICATION, data);
     });
   }
 }
