@@ -22,18 +22,33 @@
       type: String,
       default: null,
     },
-    //是否开启视频
+    //是否开启音频
     audioEnable: {
       type: Boolean,
       default: true,
     },
-    //是否开启音频
+    //是否开启视频
     videoEnable: {
       type: Boolean,
       default: true,
     },
-    //是否开启音频
+    //是否静音
     muted: {
+      type: Boolean,
+      default: true,
+    },
+    //是否开启按键
+    useDtmf: {
+      type: Boolean,
+      default: false,
+    },
+    //是否使用摄像头
+    useCamera: {
+      type: Boolean,
+      default: false,
+    },
+    //是否仅cv模式
+    recvOnly: {
       type: Boolean,
       default: true,
     },
@@ -42,16 +57,23 @@
   const use = reactive({
     zlmsdpUrl: props.videoUrl,
     debug:isDevMode(),
-    audioEnable: props.audioEnable,//是否开启视频
-    videoEnable: props.videoEnable,//是否开启音频
+    audioEnable: props.audioEnable,
+    videoEnable: props.videoEnable,
+    useDtmf: props.useDtmf,
+    useCamera:props.useCamera,
+    recvOnly: props.recvOnly,
   });
-
-  const { play, destroy } = useZlmRtc(use, containerRef);
+  const { success,sendDtmf ,play, destroy } = useZlmRtc(use, containerRef);
   
   watch(
-    () => props.videoUrl,
+    () => [props.videoUrl || props.audioEnable|| props.videoEnable|| props.useDtmf|| props.useCamera|| props.recvOnly],
     () => {
       use.zlmsdpUrl = props.videoUrl;
+      use.audioEnable = props.audioEnable;
+      use.videoEnable = props.videoEnable;
+      use.useDtmf = props.useDtmf;
+      use.useCamera = props.useCamera;
+      use.recvOnly = props.recvOnly;
     },
     { immediate: true, deep: true },
   );
@@ -60,7 +82,7 @@
     destroy();
   });
 
-  defineExpose({ play, destroy });
+  defineExpose({ success,sendDtmf ,play, destroy });
 </script>
 
 <style lang="less" scoped>

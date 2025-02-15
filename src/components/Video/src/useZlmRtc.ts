@@ -14,11 +14,13 @@ export interface RtcProps {
   audioEnable?: boolean;
   videoEnable?: boolean;
   recvOnly?: boolean;
+  usedatachannel?: boolean;
+  useDtmf?: boolean;
 }
 
 export function useZlmRtc(rtcProps: RtcProps, container?: Ref) {
   const { success } = useScript({ src: publicPath + 'script/zlmRTC/ZLMRTCClient.js' });
-  let zlmRtcClient = null as any;
+  let zlmRtcClient = ref() as any;
   let timer = null as any;
   let playTimer = null as any;
   let playTimeout = null as any;
@@ -31,7 +33,7 @@ export function useZlmRtc(rtcProps: RtcProps, container?: Ref) {
       return initBoolean;
     }
     try{
-      zlmRtcClient = new (window as any).ZLMRTCClient.Endpoint({
+      zlmRtcClient.value = new (window as any).ZLMRTCClient.Endpoint({
         ...deepMerge(
           {
             zlmsdpUrl: '', //播放流地址
@@ -41,7 +43,8 @@ export function useZlmRtc(rtcProps: RtcProps, container?: Ref) {
             audioEnable: true,//是否开启视频
             videoEnable: true,//是否开启音频
             recvOnly: true,//是否仅cv模式
-            usedatachannel: false//是否使用数据通道
+            usedatachannel: false,//是否使用数据通道
+            useDtmf:false,//是否启用dtmf按键（自定义属性）
           },
           rtcProps || {},
         ),
@@ -52,37 +55,37 @@ export function useZlmRtc(rtcProps: RtcProps, container?: Ref) {
       console.log('初始化webRTP失败：' + error);
       return initBoolean;
     }
-    zlmRtcClient.on('WEBRTC_INIT_ZLMSDP_URL_ERR', (e) => {
+    unref(zlmRtcClient).on('WEBRTC_INIT_ZLMSDP_URL_ERR', (e) => {
       // 初始化报错TGGT
       eventcallbacK('加载播放时报错：', e);
     });
-    zlmRtcClient.on('WEBRTC_ICE_CANDIDATE_ERROR', (e) => {
+    unref(zlmRtcClient).on('WEBRTC_ICE_CANDIDATE_ERROR', (e) => {
       // ICE 协商出错
       eventcallbacK('ICE ERROR', 'ICE 协商出错');
     });
 
-    zlmRtcClient.on('WEBRTC_ON_REMOTE_STREAMS', (e) => {
+    unref(zlmRtcClient).on('WEBRTC_ON_REMOTE_STREAMS', (e) => {
       //获取到了远端流，可以播放
       eventcallbacK('playing', '播放成功');
     });
 
-    zlmRtcClient.on('WEBRTC_OFFER_ANWSER_EXCHANGE_FAILED', (e) => {
+    unref(zlmRtcClient).on('WEBRTC_OFFER_ANWSER_EXCHANGE_FAILED', (e) => {
       // offer anwser 交换失败
       eventcallbacK('OFFER ANSWER ERROR ', 'offer anwser 交换失败');
       if (e.code == -400 && e.msg == '流不存在') {
         console.log('流不存在');
         timer = setTimeout(() => {
-          zlmRtcClient.close();
+          unref(zlmRtcClient).close();
           createVideoDom();
         }, 100);
       }
     });
-    zlmRtcClient.on('WEBRTC_ON_LOCAL_STREAM', (s) => {
+    unref(zlmRtcClient).on('WEBRTC_ON_LOCAL_STREAM', (s) => {
       // 获取到了本地流
       localSteam.value = 1;
       eventcallbacK('LOCAL STREAM', '获取到了本地流');
     });
-    zlmRtcClient.on('WEBRTC_ON_INIT_STAUTS', () => {
+    unref(zlmRtcClient).on('WEBRTC_ON_INIT_STAUTS', () => {
       // 自定义改动zlmrct.js事件 添加此事件表示加载成功
       localSteam.value = 2;
       eventcallbacK('LOCAL STREAM', '加载流媒体成功');
@@ -96,10 +99,10 @@ export function useZlmRtc(rtcProps: RtcProps, container?: Ref) {
     }
     if (unref(success)) {
       // 没有初始化成功直接返回
-      if (!zlmRtcClient && !createVideoDom()) {
+      if (!unref(zlmRtcClient) && !createVideoDom()) {
         return false;
       }
-      console.log("stats : "+zlmRtcClient?.pc?.connectionState);
+      console.log("stats : "+unref(zlmRtcClient)?.pc?.connectionState);
       if(!playTimer){
         playTimer = setInterval(() => play(), 200);
         playTimeout = setTimeout(() => {
@@ -109,7 +112,7 @@ export function useZlmRtc(rtcProps: RtcProps, container?: Ref) {
         }, 5000);
       }
       // new  connected:准备完成
-      if(zlmRtcClient?.pc?.connectionState === "connected"){
+      if(unref(zlmRtcClient)?.pc?.connectionState === "connected"){
         unref(container)?.play();
         playTimer && clearInterval(playTimer);
         playTimeout && clearTimeout(playTimeout);
@@ -128,12 +131,16 @@ export function useZlmRtc(rtcProps: RtcProps, container?: Ref) {
       return;
     }
   };
+  //发送dtmf
+  const sendDtmf = (mes) =>{
+    unref(zlmRtcClient).sendTones(mes);
+  }
   //暂停
   const pause = () => {
-    if (!zlmRtcClient) {
+    if (!unref(zlmRtcClient)) {
       return;
     }
-    zlmRtcClient.close();
+    unref(zlmRtcClient).close();
     localSteam.value = 0;
   };
   /**
@@ -148,11 +155,11 @@ export function useZlmRtc(rtcProps: RtcProps, container?: Ref) {
     timer = null;
     playTimer = null;
     playTimeout = null;
-    if (!zlmRtcClient) {
+    if (!unref(zlmRtcClient)) {
       return;
     }
-    zlmRtcClient.close();
-    zlmRtcClient = null;
+    unref(zlmRtcClient).close();
+    zlmRtcClient.value = null;
     rtcProps.zlmsdpUrl = "";
   };
 
@@ -160,6 +167,7 @@ export function useZlmRtc(rtcProps: RtcProps, container?: Ref) {
     () => rtcProps,
     () => {
       nextTick(() => {
+        console.log("watch rtcProps:",rtcProps);
         //先注销
         destroy();
         //然后播放
@@ -177,5 +185,5 @@ export function useZlmRtc(rtcProps: RtcProps, container?: Ref) {
   const eventcallbacK = (type: string, message: string) => {
     console.log('RTC 事件回调 type:' + type + ' message:' + message);
   };
-  return { zlmRtcClient, success, localSteam, play, pause, destroy };
+  return { zlmRtcClient, success, localSteam,sendDtmf, play, pause, destroy };
 }

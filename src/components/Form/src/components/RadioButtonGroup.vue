@@ -11,7 +11,7 @@
   </Radio.Group>
 </template>
 <script lang="ts" setup>
-  import { PropType, computed, ref,watch } from 'vue';
+  import { PropType, computed, ref } from 'vue';
   import { Radio } from 'ant-design-vue';
   import { isString } from '@/utils/is';
   import { useRuleFormItem } from '@/hooks/component/useFormItem';
@@ -21,6 +21,7 @@
   type RadioItem = string | OptionsItem;
 
   defineOptions({ name: 'RadioButtonGroup' });
+
   const props = defineProps({
     value: {
       type: [String, Number, Boolean] as PropType<string | number | boolean>,
@@ -31,19 +32,12 @@
     },
   });
 
-  const emit = defineEmits(['change', 'update:value']);
+  // const emit = defineEmits(['change']);
 
   const attrs = useAttrs();
   const emitData = ref<any[]>([]);
   // Embedded in the form, just use the hook binding to perform form verification
   const [state] = useRuleFormItem(props, 'value', 'change', emitData);
-
-  watch(
-    () => state.value,
-    (v) => {
-      emit('update:value', v);
-    },
-  );
 
   // Processing options value
   const getOptions = computed((): OptionsItem[] => {
@@ -51,9 +45,8 @@
     if (!options || options?.length === 0) return [];
 
     const isStringArr = options.some((item) => isString(item));
-    if (!isStringArr) {
-      return options as OptionsItem[];
-    }
+    if (!isStringArr) return options as OptionsItem[];
+
     return options.map((item) => ({ label: item, value: item })) as OptionsItem[];
   });
 

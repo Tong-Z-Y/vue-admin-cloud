@@ -20,6 +20,7 @@
     <BasicForm @register="register" />
     <Button size="small"   @click="handleOk">拨打</Button>
     <Button size="small"   @click="handleHangUp">挂机</Button>
+    <Button size="small"   @click="handleDtmf">按键号码</Button>
     <Switch size="small"    v-model:checked="pushStats.videoEnable" />
     <Button size="small"   @click="handleAgentStats">更新客服状态</Button>
   </div>
@@ -73,11 +74,14 @@
   const pushStats = reactive({
     zlmsdpUrl: '',
     audioEnable: true,
-    videoEnable: true,
+    videoEnable: false,
     recvOnly: false,
     debug: true,
+    useDtmf:true,
 	  useCamera: true,
   });
+
+  const {success,sendDtmf, destroy } = useZlmRtc(pushStats); //加载 webrtc 语音对讲配置
 
   const schemas: FormSchema[] = [
     {
@@ -85,9 +89,17 @@
       component: 'Input',
       label: '被叫号码',
       colProps: {
-        span: 12,
+        span: 6,
       },
       required: true,
+    },
+    {
+      field: 'dtmf',
+      component: 'Input',
+      label: '按键号码',
+      colProps: {
+        span: 6,
+      }
     },
   ]
 
@@ -123,8 +135,18 @@
     });
   }
 
-  //语音对讲
-  const { success, destroy } = useZlmRtc(pushStats); //加载 webrtc 语音对讲配置
+  const handleDtmf =async()=>{
+    if(!unref(success)){
+      createMessage.error('webrtp加载失败');
+      return;
+    }
+    const { dtmf } =await validate();
+    if(!dtmf){
+      createMessage.error('请输入拨号号码');
+      return;
+    }
+    sendDtmf(dtmf)
+  }
 
   const handleOk = async ()=>{
     if(!unref(success)){
@@ -151,11 +173,11 @@
     stats.timeout = setTimeout(()=>{
       stats.status = 1;
       destroy();
-      createMessage.error('获取推流地址超时');
+      createMessage.error('获取推流地址超时1');
       stats.timeout && clearInterval(stats.timeout);
     },15000)
     //开始推流
-    pushStats.zlmsdpUrl =authUrl(setObjToUrlParams(agentStats.mediaAddress,{app:'PUSH_RTP_STREAM',stream:(pushStats.videoEnable?'PUSH_VIDEO_RTP_STREAM:':'PUSH_AUDIO_RTP_STREAM:')+agentStats.agentKey,type:'push'})) as string;
+    pushStats.zlmsdpUrl =authUrl(setObjToUrlParams(agentStats.mediaAddress,{app:'RTP_STREAM',stream:(pushStats.videoEnable?'PUSH_VIDEO_RTP_STREAM:':'PUSH_AUDIO_RTP_STREAM:')+agentStats.agentKey,type:'push'})) as string;
     stats.status = 3;//开始推流中
     sendMessage();
   }
@@ -180,7 +202,7 @@
 
   onBeforeMount(()=>{
     //进入页面加载客服socket
-    useFsSocket('ws://192.168.1.5:9092/','/socket.io');
+    useFsSocket('ws://192.168.1.20:9092/','/socket.io');
     //登陆成功回调
     rootSocketEmitter.off(SocketOutEvent.AGENT_OUT_STATUS);
     rootSocketEmitter.off(SocketOutEvent.AGENT_OUT_LOGIN);
@@ -298,12 +320,14 @@
   })
   //开始处理回调事件
   const handleNotification = ({agentState,callId,callType,called,caller,direction,groupId,onVideo}) =>{
-    switch(callType){
-      case "INNER_CALL"://呼入来电振铃
-        handleInCallRing(callId,called,caller,onVideo);
-        break;
-      default:
-        console.log("暂不支持此类型事件：",callType);
+    if('IN_CALL_RING' === agentState && 'INNER_CALL' === callType ){
+      //呼入来电振铃
+      handleInCallRing(callId,called,caller,onVideo);
+    }else if('TALKING' === agentState && 'INNER_CALL' === callType ){
+      //对方已接通等待连接
+      createMessage.info('对方已接通等待连接');
+    }else{
+      console.log("暂不支持此类型事件：",callType);
     }
   }
   //呼入来电处理
@@ -328,11 +352,11 @@
         stats.timeout = setTimeout(()=>{
           stats.status = 1;
           destroy();
-          createMessage.error('获取推流地址超时');
+          createMessage.error('获取推流地址超时2');
           stats.timeout && clearInterval(stats.timeout);
         },15000)
         //开始推流
-        pushStats.zlmsdpUrl =authUrl(setObjToUrlParams(agentStats.mediaAddress,{app:'PUSH_RTP_STREAM',stream:(pushStats.videoEnable?'PUSH_VIDEO_RTP_STREAM:':'PUSH_AUDIO_RTP_STREAM:')+agentStats.agentKey,type:'push'})) as string;
+        pushStats.zlmsdpUrl =authUrl(setObjToUrlParams(agentStats.mediaAddress,{app:'RTP_STREAM',stream:(pushStats.videoEnable?'PUSH_VIDEO_RTP_STREAM:':'PUSH_AUDIO_RTP_STREAM:')+agentStats.agentKey,type:'push'})) as string;
         stats.status = 3;//开始推流中
         sendMessage();
       },

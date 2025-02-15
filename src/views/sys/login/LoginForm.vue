@@ -91,7 +91,7 @@
   </Form>
 </template>
 <script lang="ts" setup>
-  import { reactive, ref, toRaw, unref, computed, onMounted } from 'vue';
+  import { reactive, ref, toRaw, unref, computed, onMounted, onUnmounted } from 'vue';
   import { Checkbox, Form, Input, Row, Col, Button, Divider, Image } from 'ant-design-vue';
   import {
     GithubFilled,
@@ -135,6 +135,7 @@
     key: '',
     loginCode: '',
     images: '',
+    timer : undefined as any
   });
 
   const { validForm } = useFormValid(formRef);
@@ -146,8 +147,13 @@
   onMounted(() => {
     init();
     GetCode();
+    formData.timer = setInterval(()=>GetCode(),1000*60*1)
+   ;
   });
 
+  onUnmounted(()=>{
+    formData.timer &&  clearInterval(formData.timer);
+  })
   const init = () => {
     const rememberLoing = getAuthCache<RememberLoing>(REMEMBER);
     if (!!rememberLoing) {
