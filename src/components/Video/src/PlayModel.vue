@@ -7,7 +7,7 @@
     title="播放器"
     @cancel="handleCancel"
     width="1200px"
-    :footer="false"
+    :footer="null"
   >
     <div :class="` ${prefixCls} flex flex-row gap-x-px `">
       <div
@@ -32,22 +32,22 @@
         <!-- 播放地址 -->
         <div
           :class="`${prefixCls}-left-bot mt-2 row-span-0 space-y-2`"
-          v-if="stats.selectPlay === 'Jessibuca'"
+          v-if="stats.selectPlay === 'Stream'"
         >
           <Input v-model:value="payUrl" disabled>
             <template #addonBefore>
               <Dropdown trigger="click" :overlayClassName="`${prefixCls}-left-dropdown`">
                 <template #overlay>
                   <Menu @click="handleMenuClick">
-                    <MenuItem :key="val" v-for="val in Object.keys(stats.jessibucaMap)">
-                      <Input :defaultValue="stats.jessibucaMap[val].value" disabled>
+                    <MenuItem :key="val" v-for="val in Object.keys(stats.streamMap)">
+                      <Input :defaultValue="stats.streamMap[val].value" disabled>
                         <template #addonBefore>
-                          {{ stats.jessibucaMap[val].name }}
+                          {{ stats.streamMap[val].name }}
                         </template>
                         <template #addonAfter>
                           <Button
                             :class="`${prefixCls}-left-bot-cope`"
-                            @click="handleCopy(stats.jessibucaMap[val].value)"
+                            @click="handleCopy(stats.streamMap[val].value)"
                             >复制</Button
                           >
                         </template>
@@ -64,7 +64,7 @@
             <template #addonAfter>
               <Button
                 :class="`${prefixCls}-left-bot-cope`"
-                @click="handleCopy(stats.jessibucaMap[stats.playType].value)"
+                @click="handleCopy(stats.streamMap[stats.playType].value)"
                 >复制</Button
               >
             </template>
@@ -398,9 +398,9 @@
   const { prefixCls } = useDesign('video-play-model');
   const { createMessage } = useMessage();
   const payComponent: any = computed(() => {
-    if (stats.selectPlay == 'Jessibuca') {
+    if (stats.selectPlay == 'Stream') {
       return VideoJessibucaPlay;
-    } else if (stats.selectPlay == 'ZlmRtc') {
+    }  else if (stats.selectPlay == 'ZlmRtc') {
       return VideoZlmRtcPlay;
     }
   });
@@ -433,14 +433,14 @@
   });
   const stats = reactive({
     //视频相关
-    selectPlay: 'Jessibuca', //选择的播放器
+    selectPlay: 'Stream', //选择的播放器
     playType: 'wsFlv', //默认播放地址
     playing: true, //播放状态
     localSteam : 0,
     options: [
       {
-        label: 'Jessibuca',
-        value: 'Jessibuca',
+        label: 'Stream',
+        value: 'Stream',
       },
       {
         label: 'ZlmRtc',
@@ -463,7 +463,7 @@
     mediaServerId: '', //流媒体编号
     tracks: [] as any, // 流编码信息
     zlmRtcUrl: {} as any, //zlmrtc播放地址
-    jessibucaMap: {} as any, //jessibuca播放地址
+    streamMap: {} as any, //jessibuca播放地址
     //语音对讲相关
     onAudio: 0 as number, //语音对讲状态 0.关闭中 1.加载中 2.加载完成
     audioTimer: null as any, //语音加载检测器
@@ -491,15 +491,18 @@
   //获取播放地址
   const payUrl = computed(() => {
     let url;
-    if (stats.selectPlay === 'Jessibuca') {
-      url = stats.jessibucaMap[stats.playType]?.value;
+    if (stats.selectPlay === 'Stream') {
+      url = stats.streamMap[stats.playType]?.value;
     } else {
       url = stats.zlmRtcUrl?.value;
     }
     return url;
   });
-  const handleSelectPlay = (val) => {
-    stats.selectPlay = val;
+  const handleSelectPlay = (item) => {
+    if( typeof item !== 'string'){
+      return;
+    }
+    stats.selectPlay = item;
   };
   //复制触发
   const handleCopy = (value) => {
@@ -695,8 +698,8 @@
     stats.channelId = channelId;
     stats.mediaServerId = mediaServerId;
     stats.tracks = tracks;
-    stats.jessibucaMap = {
-      flv: {
+    stats.streamMap = {
+      hls: {
         name: 'flv地址',
         value: authUrl(sslStatus == 0 ? flv?.url : httpsFlv?.url),
       },
@@ -723,6 +726,9 @@
   });
 </script>
 <style lang="less">
+  .ant-modal div[aria-hidden="true"] {
+      display: none !important
+  }
   @prefix-cls: ~'@{namespace}-video-play-model';
   .@{prefix-cls} {
     min-height: 680px;

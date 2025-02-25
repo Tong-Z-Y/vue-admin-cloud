@@ -2,13 +2,13 @@ import { unref, Ref, reactive, watch, nextTick } from 'vue';
 import { isEmpty } from '@/utils/is';
 import { deepMerge } from '@/utils';
 import { useScript } from '@/hooks/web/useScript';
-
 export interface JessibucaProps {
   videoUrl?: string;
   options?: Recordable;
   hasAudio?: boolean;
   isMute?: boolean;
 }
+const publicPath = import.meta.env.VITE_PUBLIC_PATH || '/';
 
 export function useJessibuca(container: Ref, jessibucaProps: JessibucaProps) {
   let jessibucaPlayer = null as any;
@@ -23,7 +23,6 @@ export function useJessibuca(container: Ref, jessibucaProps: JessibucaProps) {
     kBps: 0,
   });
 
-  const publicPath = import.meta.env.VITE_PUBLIC_PATH || '/';
   let options = deepMerge(
     {
       autoWasm: true,
@@ -36,7 +35,7 @@ export function useJessibuca(container: Ref, jessibucaProps: JessibucaProps) {
       hasVideo: true,
       heartTimeout: 5,
       heartTimeoutReplay: true,
-      heartTimeoutReplayTimes: -1,
+      heartTimeoutReplayTimes: 3,
       hiddenAutoPause: false,
       hotKey: true,
       isFlv: false,
@@ -45,9 +44,9 @@ export function useJessibuca(container: Ref, jessibucaProps: JessibucaProps) {
       isResize: false,
       keepScreenOn: true,
       loadingText: '请稍等, 视频加载中......',
-      loadingTimeout: 5,
+      loadingTimeout: 10,
       loadingTimeoutReplay: true,
-      loadingTimeoutReplayTimes: -1,
+      loadingTimeoutReplayTimes: 3,
       openWebglAlignment: false,
       operateBtns: {
         fullscreen: false,
@@ -234,6 +233,7 @@ export function useJessibuca(container: Ref, jessibucaProps: JessibucaProps) {
    * 销毁事件
    */
   const destroy = () => {
+    playTimer && clearInterval(playTimer);
     playTimer = null;
     stats.destroy = true;
     stats.kBps = 0;

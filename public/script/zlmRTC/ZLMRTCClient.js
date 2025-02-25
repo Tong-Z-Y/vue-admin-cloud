@@ -3755,7 +3755,7 @@ var ZLMRTCClient = (function (exports) {
 	        }
 	      }
 	    });
-
+			
 	    var desc = new window.RTCSessionDescription({
 	      type: 'offer',
 	      sdp: sdp$1
@@ -9168,13 +9168,14 @@ var ZLMRTCClient = (function (exports) {
 	      });
 	      */
 	      this.pc.createOffer().then(desc => {
-	        log(this.TAG, 'offer:', desc.sdp);
+					let descsdp = this.addFmtpForTelephoneEvent(desc.sdp);
+	        log(this.TAG, 'offer:', descsdp);
 	        this.pc.setLocalDescription(desc).then(() => {
 	          axios({
 	            method: 'post',
 	            url: this.options.zlmsdpUrl,
 	            responseType: 'json',
-	            data: desc.sdp,
+	            data: descsdp,
 	            headers: {
 	              'Content-Type': 'text/plain;charset=utf-8'
 	            }
@@ -9298,6 +9299,25 @@ var ZLMRTCClient = (function (exports) {
 				log(this.TAG, 'ERROR dtmfSender is null ');
 			}
 		}
+		addFmtpForTelephoneEvent(sdp) {
+			// 按行分割 SDP
+			const lines = sdp.split('\n');
+	
+			// 查找 telephone-event 的 PT 并添加 fmtp
+			const modifiedLines = lines.map(line => {
+					// 匹配 telephone-event 的 rtpmap 行
+					const match = line.match(/a=rtpmap:(\d+) telephone-event\/(\d+)/);
+					if (match) {
+							const pt = match[1]; // 提取 Payload Type
+							const fmtpLine = `a=fmtp:${pt} 0-16`; // 生成 fmtp 行
+							return `${line}\n${fmtpLine}`; // 返回原行 + fmtp 行
+					}
+					return line; // 非 telephone-event 行，直接返回
+			});
+	
+			// 将修改后的行重新拼接为 SDP
+			return modifiedLines.join('\n');
+	}
 	  sendMsg(data) {
 	    if (this.datachannel != null) {
 	      this.datachannel.send(data);

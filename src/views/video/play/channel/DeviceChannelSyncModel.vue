@@ -5,7 +5,7 @@
     :wrapClassName="`${prefixCls}`"
     :closable="false"
     :closeIcon="false"
-    :footer="false"
+    :footer="null"
     :width="250"
     :minHeight="250"
     destroyOnClose
