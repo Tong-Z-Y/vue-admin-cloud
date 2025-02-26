@@ -27,7 +27,7 @@
         </div>
         <!-- 播放器 -->
         <div :class="`${prefixCls}-left-video bg-black grid row-span-15`">
-          <component ref="payVideo" :is="payComponent" :videoUrl="payUrl" />
+          <component ref="payVideo" :is="payComponent" :videoUrl="payUrl" :hasAudio="true" />
         </div>
         <!-- 播放地址 -->
         <div
@@ -74,319 +74,32 @@
       <Divider v-if="props.control" style="height: inherit" type="vertical" />
       <div v-if="props.control" :class="`${prefixCls}-right basis-4/20 row-span-3 flex flex-col `">
         <!-- 方向控制 -->
-        <div :class="`${prefixCls}-right-direction`">
-          <Divider>方向控制</Divider>
-          <div class="flex">
-            <div class="grow relative flex items-center justify-center h-36">
-              <div class="absolute place-content-stretch h-36 w-36 rotate-45 z-0">
-                <div
-                  class="absolute top-0 left-0 h-16 w-16 active:bg-sky-300 border-solid border-1 border-sky-500 rounded-tl-full cursor-pointer"
-                  @mousedown="ptzCamera('up')"
-                  @mouseup="ptzCamera('stop')"
-                >
-                  <div
-                    class="absolute bottom-0 right-0 bg-white w-9 h-9 border-t-1 border-l-1 border-solid border-sky-500 border-b-white border-r-white rounded-tl-full"
-                  ></div>
-                  <Icon
-                    class="absolute cursor-pointer bottom-6.5 right-6.5 z-3 -rotate-45"
-                    icon="teenyicons-triangle-solid"
-                    color="#0ea5e9"
-                  />
-                </div>
-                <div
-                  class="absolute top-0 right-0 h-16 w-16 active:bg-sky-300 border-solid border-1 border-sky-500 rounded-tr-full cursor-pointer"
-                  @mousedown="ptzCamera('right')"
-                  @mouseup="ptzCamera('stop')"
-                >
-                  <div
-                    class="absolute bottom-0 left-0 bg-white w-9 h-9 border-t-1 border-r-1 border-solid border-sky-500 rounded-tr-full"
-                  ></div>
-                  <Icon
-                    class="absolute cursor-pointer bottom-6.5 left-6.5 z-3 rotate-45"
-                    icon="teenyicons-triangle-solid"
-                    color="#0ea5e9"
-                  />
-                </div>
-                <div
-                  class="absolute bottom-0 left-0 h-16 w-16 active:bg-sky-300 border-solid border-1 border-sky-500 rounded-bl-full cursor-pointer"
-                  @mousedown="ptzCamera('left')"
-                  @mouseup="ptzCamera('stop')"
-                >
-                  <div
-                    class="absolute top-0 right-0 bg-white w-9 h-9 border-b-1 border-l-1 border-solid border-sky-500 rounded-bl-full"
-                  ></div>
-                  <Icon
-                    class="absolute cursor-pointer top-6.5 right-6.5 z-3 rotate-225"
-                    icon="teenyicons-triangle-solid"
-                    color="#0ea5e9"
-                  />
-                </div>
-                <div
-                  class="absolute bottom-0 right-0 h-16 w-16 active:bg-sky-300 border-solid border-1 border-sky-500 rounded-br-full cursor-pointer"
-                  @mousedown="ptzCamera('down')"
-                  @mouseup="ptzCamera('stop')"
-                >
-                  <div
-                    class="absolute top-0 left-0 bg-white w-9 h-9 border-b-1 border-r-1 border-solid border-sky-500 rounded-br-full"
-                  ></div>
-                  <Icon
-                    class="absolute cursor-pointer top-6.5 left-6.5 z-3 rotate-135"
-                    icon="teenyicons-triangle-solid"
-                    color="#0ea5e9"
-                  />
-                </div>
-              </div>
-              <div class="absolute bg-white h-22 w-22 border-solid rounded-full z-1"></div>
-              <div
-                :class="`${audioClickStyle} absolute z-2  h-15 w-15 border-solid rounded-full border-1 border-sky-500 flex items-center justify-center cursor-pointer`"
-                @click="audioIntercom"
-              >
-                <Icon
-                  class="cursor-pointer"
-                  :icon="`ic-outline-keyboard-voice`"
-                  size="40"
-                  color="#0ea5e9"
-                />
-              </div>
-            </div>
-            <div class="flex flex-col">
-              <div class="flex-1 flex items-center">
-                <Icon
-                  class="cursor-pointer"
-                  size="26"
-                  color="#0ea5e9"
-                  icon="solar-magnifer-zoom-in-outline"
-                  @mousedown="ptzCamera('zoomin')"
-                  @mouseup="ptzCamera('stop')"
-                />
-              </div>
-              <div class="flex-1 flex items-center">
-                <Icon
-                  class="cursor-pointer"
-                  size="26"
-                  color="#0ea5e9"
-                  icon="solar-magnifer-zoom-out-linear"
-                  @mousedown="ptzCamera('zoomout')"
-                  @mouseup="ptzCamera('stop')"
-                />
-              </div>
-            </div>
-          </div>
-          <div>
-            <Slider v-model:value="stats.directionSpeed" :min="0" :max="255" />
-          </div>
-        </div>
+        <PlayDirection :deviceId="stats.deviceId" :channelId="stats.channelId" :auth="auth" :audioPushApi="audioPushApi" :broadcastApi="broadcastApi" :stopPushApi="stopPushApi" @options-controSpeed="handleControSpeed"/>
         <!-- 云台控制 -->
-        <div :class="`${prefixCls}-right-ptz grow `">
-          <Divider>云台控制</Divider>
-          <div class="flex flex-col space-y-3">
-            <div class="flex flex-col space-y-1">
-              <div>
-                <InputNumber
-                  v-model:value="stats.presetPositionNo"
-                  :min="1"
-                  :max="255"
-                  size="small"
-                >
-                  <template #addonBefore> 预设位编号 </template>
-                  <template #addonAfter>
-                    <Button size="small" @click="ptzCommand(129, 0, stats.presetPositionNo, 0)"
-                      >设置</Button
-                    >
-                  </template>
-                </InputNumber>
-              </div>
-              <div class="flex flex-row">
-                <Button
-                  class="flex-1"
-                  @click="ptzCommand(131, 0, stats.presetPositionNo, 0)"
-                  size="small"
-                  >删除</Button
-                >
-                <Button
-                  type="primary"
-                  class="flex-1"
-                  @click="ptzCommand(130, 0, stats.presetPositionNo, 0)"
-                  size="small"
-                  >调用</Button
-                >
-              </div>
-            </div>
-            <div class="flex flex-col space-y-1">
-              <div>
-                <InputNumber v-model:value="stats.ruiseSpeed" :min="1" :max="4095" size="small">
-                  <template #addonBefore> 巡航速度 </template>
-                  <template #addonAfter>
-                    <Button
-                      size="small"
-                      @click="
-                        ptzCommand(
-                          134,
-                          stats.cruiseGroupNo,
-                          stats.ruiseSpeed % 256,
-                          Math.floor(stats.ruiseSpeed / 256) * 16,
-                        )
-                      "
-                      >设置</Button
-                    >
-                  </template>
-                </InputNumber>
-                <InputNumber
-                  v-model:value="stats.ruiseResidenceTime"
-                  :min="1"
-                  :max="4095"
-                  size="small"
-                >
-                  <template #addonBefore> 停留时间 </template>
-                  <template #addonAfter>
-                    <Button
-                      size="small"
-                      @click="
-                        ptzCommand(
-                          135,
-                          stats.cruiseGroupNo,
-                          stats.ruiseResidenceTime % 256,
-                          Math.floor(stats.ruiseResidenceTime / 256) * 16,
-                        )
-                      "
-                      >设置</Button
-                    >
-                  </template>
-                </InputNumber>
-                <InputNumber v-model:value="stats.cruiseGroupNo" :min="1" :max="255" size="small">
-                  <template #addonBefore> 巡航组编号 </template>
-                </InputNumber>
-              </div>
-              <div class="flex flex-row">
-                <Button
-                  class="flex-1"
-                  size="small"
-                  @click="ptzCommand(132, stats.cruiseGroupNo, stats.presetPositionNo, 0)"
-                  >添加点</Button
-                >
-                <Button
-                  class="flex-1"
-                  size="small"
-                  @click="ptzCommand(133, stats.cruiseGroupNo, stats.presetPositionNo, 0)"
-                >
-                  删除点</Button
-                >
-                <Button
-                  class="flex-1"
-                  size="small"
-                  @click="ptzCommand(133, stats.cruiseGroupNo, 0, 0)"
-                  >删除组</Button
-                >
-                <Button
-                  type="primary"
-                  size="small"
-                  class="flex-1"
-                  @click="ptzCommand(136, stats.cruiseGroupNo, 0, 0)"
-                  >巡航</Button
-                >
-              </div>
-            </div>
-            <div class="flex flex-col space-y-1">
-              <div>
-                <InputNumber v-model:value="stats.scanSpeed" :min="1" :max="4095" size="small">
-                  <template #addonBefore> 扫描速度 </template>
-                  <template #addonAfter>
-                    <Button
-                      size="small"
-                      @click="
-                        ptzCommand(
-                          138,
-                          stats.scanGroupNo,
-                          stats.scanSpeed % 256,
-                          Math.floor(stats.scanSpeed / 256) * 16,
-                        )
-                      "
-                      >设置</Button
-                    >
-                  </template>
-                </InputNumber>
-                <InputNumber v-model:value="stats.scanGroupNo" :min="1" :max="255" size="small">
-                  <template #addonBefore> 扫描组编号 </template>
-                </InputNumber>
-              </div>
-              <div class="flex flex-row">
-                <Button
-                  class="flex-1"
-                  size="small"
-                  @click="ptzCommand(137, stats.cruiseGroupNo, 1, 0)"
-                  >左边界</Button
-                >
-                <Button
-                  class="flex-1"
-                  size="small"
-                  @click="ptzCommand(137, stats.cruiseGroupNo, 2, 0)"
-                  >右边界</Button
-                >
-                <Button
-                  type="primary"
-                  size="small"
-                  class="flex-1"
-                  @click="ptzCommand(137, stats.cruiseGroupNo, 0, 0)"
-                  >扫描</Button
-                >
-                <Button type="primary" size="small" danger class="flex-1" @click="ptzCamera('stop')"
-                  >停止</Button
-                >
-              </div>
-            </div>
-          </div>
-        </div>
+        <PlayPTZ :deviceId="stats.deviceId" :channelId="stats.channelId" :controSpeed="stats.controSpeed"/>
         <!-- 流信息 -->
-        <div :class="`${prefixCls}-right-stream overflow-y-auto`">
-          <Divider>流信息</Divider>
-          <p v-if="isEmpty(stats.tracks)">暂无数据</p>
-          <Descriptions size="small" :column="1" v-if="isNotEmpty(stats.tracks)">
-            <template :key="index" v-for="(val, index) in stats.tracks">
-              <template v-if="val.codecType == 0">
-                <DescriptionsItem label="格式：">{{ val?.codecIdName }}</DescriptionsItem>
-                <DescriptionsItem label="类型：">视频</DescriptionsItem>
-                <DescriptionsItem label="分辨率："
-                  >{{ val.width }} x {{ val.height }}</DescriptionsItem
-                >
-                <DescriptionsItem label="帧率：">{{ val.fps }}</DescriptionsItem>
-              </template>
-              <template v-if="val.codecType == 1"
-                >>
-                <DescriptionsItem label="格式：">{{ val.codecIdName }}</DescriptionsItem>
-                <DescriptionsItem label="类型：">音频</DescriptionsItem>
-                <DescriptionsItem label="采样位数：">{{ val.sampleBit }}</DescriptionsItem>
-                <DescriptionsItem label="采样率：">{{ val.sampleRate }}</DescriptionsItem>
-              </template>
-              <template v-if="index < stats.tracks.length - 1">
-                <DescriptionsItem><Divider /></DescriptionsItem>
-              </template>
-            </template>
-          </Descriptions>
-        </div>
+        <PlayStream :tracks="stats.tracks"/>
       </div>
     </div>
   </BasicModal>
 </template>
 <script lang="ts" setup>
+  import PlayDirection from './components/PlayDirection.vue';
+  import PlayPTZ from './components/PlayPTZ.vue';
+  import PlayStream from './components/PlayStream.vue';
+  import Icon from '@/components/Icon/Icon.vue';
   import { reactive, ref, unref, computed, nextTick, defineAsyncComponent } from 'vue';
   import { BasicModal, useModalInner } from '@/components/Modal';
   import { RadioButtonGroup } from '@/components/Form';
   import { useDesign } from '@/hooks/web/useDesign';
-  import { isEmpty, isNotEmpty, isFunction } from '@/utils/is';
+  import { isEmpty } from '@/utils/is';
   import { setObjToUrlParams } from '@/utils';
   import { useMessage } from '@/hooks/web/useMessage';
-  import Icon from '@/components/Icon/Icon.vue';
   import { copyText } from '@/utils/copyTextToClipboard';
-  import { doPtzPtz, doPtzFrontEndCommand } from '@/api/video/ptz';
-  import { useZlmRtc } from '@/components/Video';
   import {
     Input,
-    InputNumber,
-    Descriptions,
-    DescriptionsItem,
     Button,
     Divider,
-    Slider,
     Dropdown,
     Menu,
     MenuItem,
@@ -436,7 +149,6 @@
     selectPlay: 'Stream', //选择的播放器
     playType: 'wsFlv', //默认播放地址
     playing: true, //播放状态
-    localSteam : 0,
     options: [
       {
         label: 'Stream',
@@ -448,13 +160,7 @@
       },
     ], //播放器信息
     //控制相关
-    directionSpeed: 30, //方向速度
-    presetPositionNo: 1, //预设位编号
-    cruiseGroupNo: 1, //巡航组编号
-    ruiseSpeed: 1, //巡航速度
-    ruiseResidenceTime: 1, //巡航停留时间
-    scanGroupNo: 1, //扫描组编号
-    scanSpeed: 1, //扫描速度
+    controSpeed: 30, //方向速度
     //视频流相关
     app: '', //app编号
     stream: '', //流编号
@@ -464,28 +170,6 @@
     tracks: [] as any, // 流编码信息
     zlmRtcUrl: {} as any, //zlmrtc播放地址
     streamMap: {} as any, //jessibuca播放地址
-    //语音对讲相关
-    onAudio: 0 as number, //语音对讲状态 0.关闭中 1.加载中 2.加载完成
-    audioTimer: null as any, //语音加载检测器
-    audioTimeout: null as any, //语音加载检测器
-    broadcastTimer: null as any, //语音广播加载检测器
-    broadcastTimeout: null as any, //语音广播加载检测器
-  });
-  const pushStats = reactive({
-    zlmsdpUrl: '',
-    audioEnable: true,
-    videoEnable: false,
-    recvOnly: false,
-    debug: true,
-  });
-
-  const audioClickStyle = computed(() => {
-    if (stats.onAudio === 1) {
-      return 'bg-amber-200';
-    } else if (stats.onAudio === 2) {
-      return 'bg-sky-300';
-    }
-    return '';
   });
 
   //获取播放地址
@@ -516,152 +200,14 @@
   const handleMenuClick = (val) => {
     stats.playType = val.key; //切换播放key
   };
-  //云台控制请求
-  const ptzCamera = async (code: string) => {
-    await doPtzPtz({
-      deviceId: stats.deviceId,
-      channelId: stats.channelId,
-      command: code,
-      horizonSpeed: stats.directionSpeed,
-      verticalSpeed: stats.directionSpeed,
-      zoomSpeed: stats.directionSpeed,
-    });
-  };
-  //云台指令请求
-  const ptzCommand = async (
-    code: number,
-    parameter1: number,
-    parameter2: number,
-    combindCode2: number,
-  ) => {
-    await doPtzFrontEndCommand({
-      deviceId: stats.deviceId,
-      channelId: stats.channelId,
-      cmdCode: code,
-      parameter1: parameter1,
-      parameter2: parameter2,
-      combindCode2: combindCode2,
-    });
-  };
-  //语音对讲
-  const { success, localSteam, destroy } = useZlmRtc(pushStats); //加载 webrtc 语音对讲配置
-  const audioIntercom = async () => {
-    if (!isFunction(props.audioPushApi)) {
-      return;
-    }
-    if (stats.onAudio == 1) {
-      console.log('组件加载中，防止重新点击');
-      return;
-    } else if (stats.onAudio == 0) {
-      //关闭时触发查询 并 初始化语音组件
-      const data = await props.audioPushApi({
-        deviceId: stats.deviceId,
-        channelId: stats.channelId,
-      });
-      pushStats.zlmsdpUrl = authUrl(data);
-    }
-    initAudio();
-  };
-  const initAudio = () => {
-    if (stats.onAudio == 0 || stats.onAudio == 1) {
-      stats.onAudio = 1;
-      if (!unref(success)) {
-        if (!stats.audioTimer) {
-          stats.audioTimer = setInterval(() => initAudio(), 500);
-          stats.audioTimeout = setTimeout(() => {
-            stats.onAudio = 0;
-            pushStats.zlmsdpUrl = '';
-            stats.audioTimer && clearInterval(stats.audioTimer);
-            stats.audioTimer = null;
-            stats.audioTimeout && clearInterval(stats.audioTimeout);
-            stats.audioTimeout = null;
-            //注销对讲器
-            destroy();
-            if (isFunction(props.audioPushApi)) {
-              props.stopPushApi({ deviceId: stats.deviceId,channelId: stats.channelId,})
-            }
-            createMessage.error('语音组件加载失败，请检查...');
-          }, 5000);
-        }
-        return;
-      }
-      stats.onAudio = 1;
-      createMessage.loading('语音对讲开启中，请稍后...');
-      stats.audioTimer && clearInterval(stats.audioTimer);
-      stats.audioTimeout && clearInterval(stats.audioTimeout);
-      stats.audioTimer = null;
-      stats.audioTimeout = null;
-      //加载完成后准备开始语音广播
-      initBroadcast();
-    } else {
-      stats.onAudio = 0;
-      pushStats.zlmsdpUrl = '';
-      //销毁对讲
-      destroy();
-      if (isFunction(props.audioPushApi)) {
-        props.stopPushApi({ deviceId: stats.deviceId,channelId: stats.channelId,})
-      }
-      createMessage.success('语音对讲已关闭。');
-    }
-  };
-
-  const initBroadcast = async () => {
-    //查看流是否已加载
-    if (!isFunction(props.broadcastApi)) {
-      return;
-    }
-    stats.localSteam = unref(localSteam);
-    if (unref(localSteam) != 2) {
-      if (!stats.broadcastTimer) {
-        stats.broadcastTimer = setInterval(initBroadcast, 500);
-        stats.broadcastTimeout = setTimeout(()=>{
-          stats.broadcastTimer && clearInterval(stats.broadcastTimer);
-          stats.broadcastTimer = null;
-          stats.broadcastTimeout && clearInterval(stats.broadcastTimeout);
-          stats.broadcastTimeout = null;
-          //注销对讲器
-          destroy();
-          if (isFunction(props.audioPushApi)) {
-            props.stopPushApi({ deviceId: stats.deviceId,channelId: stats.channelId,})
-          }
-          stats.onAudio = 0;
-          pushStats.zlmsdpUrl = '';
-          if(stats.localSteam == 0){
-            createMessage.error('语音对讲开启失败，请检查是否有麦克风....');
-          }else{
-            createMessage.error('语音对讲初始化失败，请联系管理员....');
-          }
-        }, 5000);
-      }
-    } else {
-      stats.broadcastTimer && clearInterval(stats.broadcastTimer);
-      stats.broadcastTimer = null;
-      stats.broadcastTimeout && clearInterval(stats.broadcastTimeout);
-      stats.broadcastTimeout = null;
-      props.broadcastApi({ deviceId: stats.deviceId, channelId: stats.channelId })
-      .then(() => {
-        stats.onAudio = 2;
-        createMessage.success('语音对讲开启成功');
-      })
-      .catch((error) => {
-        //注销对讲器
-        destroy();
-        if (isFunction(props.audioPushApi)) {
-          props.stopPushApi({ deviceId: stats.deviceId,channelId: stats.channelId,})
-        }
-        stats.onAudio = 0;
-        stats.localSteam = 0;
-        pushStats.zlmsdpUrl = '';
-        createMessage.error('语音对讲开启失败,语音流推送失败');
-      });
-    }
-  };
-
   const authUrl = (url) => {
     if (isEmpty(props.auth)) {
       return url;
     }
     return setObjToUrlParams(url, { token: props.auth });
+  };
+  const handleControSpeed = (val) => {
+    stats.controSpeed = val;
   };
 
   const handleCancel = () => {
@@ -761,24 +307,6 @@
     }
     &-right {
       min-width: 300px;
-      &-ptz {
-        .ant-input-number-group-addon:first-child {
-          width: 83px;
-          border-right: 0;
-        }
-        .ant-input-number-group-addon:last-child {
-          border-left: 0;
-          border: none;
-          padding: 0;
-        }
-      }
-      &-stream {
-        min-height: 186px;
-        height: 186px;
-        .ant-descriptions-item .ant-divider-horizontal {
-          margin: 5px 0;
-        }
-      }
       .ant-divider-with-text-center {
         margin: 5px 0;
       }
