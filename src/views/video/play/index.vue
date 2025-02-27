@@ -198,7 +198,7 @@
       },
       {
         title: '心跳间隔(秒)',
-        dataIndex: 'keepaliveIntervalTime',
+        dataIndex: 'heartBeatInterval',
         width: 100,
       },
       {

@@ -5,7 +5,6 @@
     </AppProvider>
   </ConfigProvider>
 </template>
-
 <script lang="ts" setup>
   import { AppProvider } from '@/components/Application';
   import { useTitle } from '@/hooks/web/useTitle';
@@ -41,3 +40,4 @@
   //webInitSocket
   useInitSocket();
 </script>
+

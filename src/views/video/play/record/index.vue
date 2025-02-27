@@ -304,7 +304,7 @@
     });
     stats.videoUrl = setObjToUrlParams(sslStatus == 0 ? wsFlv?.url : wssFlv?.url, {
       token: userStore.getToken,
-    });
+    }) as string;
     stats.streamId = stream;
   }, 500);
   //暂停事件
