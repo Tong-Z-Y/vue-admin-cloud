@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col flex-auto">
-    <div class ="flex-auto h-0" data-simplebar>
+    <div class ="flex-auto h-0 overflow-y-auto">
       <List size="small" :data-source="stats.resetList">
         <template #renderItem="{ item }">
           <ListItem>
@@ -21,19 +21,18 @@
         :min="1"
         v-if="stats.isShow"
         :max="255"
-        size="small"
       >
         <template #addonBefore> 预设位编号 </template>
         <template #addonAfter>
-          <Button size="small" @click="handleItemAdd(stats.presetPositionNo)"
+          <Button @click="handleItemAdd(stats.presetPositionNo)"
             >保存</Button
           >
-          <Button size="small" @click="()=>{stats.isShow = false}"
+          <Button @click="()=>{stats.isShow = false}"
             >关闭</Button
           >
         </template>
       </InputNumber>
-      <Button v-else size="small" @click="()=>{stats.isShow = true}"
+      <Button v-else @click="()=>{stats.isShow = true}"
             >添加</Button
           >
     </div>
@@ -67,7 +66,7 @@
   const stats = reactive({
     isShow: false,
     presetPositionNo: 1, //预设位编号
-    selectPresetId: 0, //选择预设位编号
+    selectPresetId: 1, //选择预设位编号
     resetList: [] //预设位列表
   })
 
@@ -108,7 +107,7 @@
   //删除预设位
   const handleItemClose = async(item) => {
     if(stats.selectPresetId == item.presetId){
-      stats.selectPresetId = 0;
+      stats.selectPresetId = 1;
     }
     await doPtzPresetDel({deviceId: props.deviceId,channelId: props.channelId,presetId: item.presetId});
     await apiPtzPresetQuery()
@@ -117,6 +116,8 @@
    const handleItemAdd = async(presetId) => {
     await doPtzPresetAdd({deviceId: props.deviceId,channelId: props.channelId,presetId: presetId});
     await apiPtzPresetQuery()
+    stats.isShow = false
+    stats.selectPresetId = 1
   };
 
 </script>

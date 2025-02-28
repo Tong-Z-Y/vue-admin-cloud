@@ -1,25 +1,40 @@
 <template>
-  <Select
-    @dropdown-visible-change="handleFetch"
-    v-bind="$attrs"
-    @change="handleChange"
-    @search="debounceSearchFn"
-    :options="getOptions"
-    v-model:value="state"
-  >
-    <template #[item]="data" v-for="item in Object.keys($slots)">
-      <slot :name="item" v-bind="data || {}"></slot>
-    </template>
-    <template #suffixIcon v-if="loading">
-      <LoadingOutlined spin />
-    </template>
-    <template #notFoundContent v-if="loading">
-      <span>
-        <LoadingOutlined spin class="mr-1" />
-        {{ t('component.form.apiSelectNotFound') }}
-      </span>
-    </template>
-  </Select>
+  <div class="ant-api-select">
+    <div class = "ant-api-select-group-wrapper">
+      <template v-if="$slots.addonBefore">
+        <div class="ant-api-select-group-addon">
+          <slot name="addonBefore"></slot>
+        </div>
+      </template>
+      <Select
+        @dropdown-visible-change="handleFetch"
+        v-bind="$attrs"
+        @change="handleChange"
+        @search="debounceSearchFn"
+        :options="getOptions"
+        v-model:value="state"
+      >
+        <template #[item]="data" v-for="item in Object.keys($slots)">
+          <slot :name="item" v-bind="data || {}"></slot>
+        </template>
+        <template #suffixIcon v-if="loading">
+          <LoadingOutlined spin />
+        </template>
+        <template #notFoundContent v-if="loading">
+          <span>
+            <LoadingOutlined spin class="mr-1" />
+            {{ t('component.form.apiSelectNotFound') }}
+          </span>
+        </template>
+      </Select>
+      <template v-if="$slots.addonAfter">
+        <div class="ant-api-select-group-addon">
+          <slot name="addonAfter"></slot>
+        </div>
+      </template>
+      
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -82,6 +97,7 @@
       type: Function as PropType<Fn>,
       default: null,
     },
+    defValOne: propTypes.bool.def(false),
   });
 
   const emit = defineEmits(['options-change', 'change', 'update:value']);
@@ -160,11 +176,17 @@
       isFirstLoaded.value = true;
       if (Array.isArray(res)) {
         optionsRef.value = res;
+        if(props.defValOne,optionsRef.value &&optionsRef.value.length>0){
+          state.value = optionsRef.value[0][props.valueField];
+        }
         emitChange();
         return;
       }
       if (resultField) {
         optionsRef.value = get(res, resultField) || [];
+      }
+      if(props.defValOne,optionsRef.value &&optionsRef.value.length>0){
+        state.value = optionsRef.value[0][props.valueField];
       }
       emitChange();
     } catch (error) {
@@ -226,3 +248,83 @@
     emitData.value = args;
   }
 </script>
+<style lang="less">
+  :where(.ant-api-select-group-addon:first-child){
+    .ant-select-selector{
+      border-start-start-radius: 0;
+      border-end-start-radius: 0;
+    }
+  }
+  .ant-api-select{
+    width: 100%;
+    max-width: 100%;
+    display: inline-block;
+    text-align: start;
+    vertical-align: top;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    font-size: 14px;
+    box-sizing: border-box;
+    .ant-api-select-group-wrapper{
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      color: rgba(0, 0, 0, 0.88);
+      font-size: 14px;
+      line-height: 1.5714285714285714;
+      list-style: none;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+      position: relative;
+      display: table;
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      .ant-select-selector:not(:first-child):not(:last-child) {
+          border-radius: 0;
+      }
+      .ant-select-selector:first-child {
+        border-start-start-radius: 0;
+        border-end-start-radius: 0;
+      }
+      .ant-select-selector:last-child {
+        border-start-end-radius: 0;
+        border-end-end-radius: 0;
+      }
+      .ant-api-select-group-addon{
+        border-radius: 4px;
+        position: relative;
+        padding: 0 11px;
+        color: rgba(0, 0, 0, 0.88);
+        font-weight: normal;
+        font-size: 14px;
+        text-align: center;
+        background-color: rgba(0, 0, 0, 0.02);
+        border: 1px solid #d9d9d9;
+        transition: all 0.3s;
+        display: table-cell;
+        width: 1px;
+        white-space: nowrap;
+        vertical-align: middle;
+        box-sizing: border-box;
+        line-height: 1;
+        &:first-child{
+          width: 83px;
+          border-right: 0;
+          border-start-end-radius: 0;
+          border-end-end-radius: 0;
+          border-inline-end: 0;
+        }
+
+        &:last-child{
+          border-left: 0;
+          border: none;
+          padding: 0;
+          border-start-start-radius: 0;
+          border-end-start-radius: 0;
+          border-inline-start: 0;
+        }
+
+      }
+    }
+  }
+  
+</style>

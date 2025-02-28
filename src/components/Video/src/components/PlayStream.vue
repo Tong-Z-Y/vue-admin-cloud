@@ -1,5 +1,5 @@
 <template>
-  <div :class="`${prefixCls} select-none`" data-simplebar>
+  <div :class="`${prefixCls} overflow-y-auto select-none`" >
     <Divider>流信息</Divider>
     <p v-if="isEmpty(props.tracks)">暂无数据</p>
     <Descriptions size="small" :column="1" v-if="isNotEmpty(props.tracks)">

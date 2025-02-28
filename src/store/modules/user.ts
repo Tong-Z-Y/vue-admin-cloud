@@ -225,13 +225,17 @@ export const useUserStore = defineStore({
      */
     async logout(goLogin = false) {
       if (this.getToken) {
-        try {
-          await doLogout({loginType:'WEB_ACCOUNT'});
-        } catch {
+        doLogout({loginType:'WEB_ACCOUNT'}).then(() => {
+          this.close(goLogin);
+          console.log('注销Token成功');
+        }).catch(() => {
           console.log('注销Token失败');
-        }
+        }).finally(() => {
+          this.close(goLogin);
+        });
+      }else{
+        this.close(goLogin);
       }
-      this.close(goLogin);
     },
     //清空缓存
     close(goLogin = false) {
