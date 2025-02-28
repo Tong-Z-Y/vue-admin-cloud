@@ -40,8 +40,7 @@
 </template>
 <script lang="ts" setup>
   import { onBeforeMount,reactive } from 'vue';
-  import { doPtzPresetQuery,doPtzPresetDel,doPtzPresetAdd,doPtzPresetCall,doPtzFrontEndCommand } from '@/api/video/ptz';
-  import { useMessage } from '@/hooks/web/useMessage';
+  import { doPtzPresetQuery,doPtzPresetDel,doPtzPresetAdd,doPtzPresetCall } from '@/api/video/ptz';
   import {
     Button,
     List,
@@ -62,11 +61,10 @@
       default: null,
     },
   });
-  const { createMessage } = useMessage();
   const stats = reactive({
     isShow: false,
     presetPositionNo: 1, //预设位编号
-    selectPresetId: 1, //选择预设位编号
+    selectPresetId: '', //选择预设位编号
     resetList: [] //预设位列表
   })
 
@@ -74,24 +72,6 @@
     console.log('PtzPreset')
     apiPtzPresetQuery()
   })
-
-
-   //云台指令请求
- const ptzCommand = async (
-    code: number,
-    parameter1: number,
-    parameter2: number,
-    combindCode2: number,
-  ) => {
-    await doPtzFrontEndCommand({
-      deviceId: props.deviceId,
-      channelId: props.channelId,
-      cmdCode: code,
-      parameter1: parameter1,
-      parameter2: parameter2,
-      combindCode2: combindCode2,
-    });
-  };
 
   const apiPtzPresetQuery = async ()=>{
     stats.resetList = await doPtzPresetQuery({deviceId: props.deviceId,channelId: props.channelId})
@@ -107,7 +87,7 @@
   //删除预设位
   const handleItemClose = async(item) => {
     if(stats.selectPresetId == item.presetId){
-      stats.selectPresetId = 1;
+      stats.selectPresetId = '0';
     }
     await doPtzPresetDel({deviceId: props.deviceId,channelId: props.channelId,presetId: item.presetId});
     await apiPtzPresetQuery()
@@ -117,7 +97,7 @@
     await doPtzPresetAdd({deviceId: props.deviceId,channelId: props.channelId,presetId: presetId});
     await apiPtzPresetQuery()
     stats.isShow = false
-    stats.selectPresetId = 1
+    stats.selectPresetId = '0'
   };
 
 </script>

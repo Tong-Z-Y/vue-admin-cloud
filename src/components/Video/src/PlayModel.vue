@@ -2,6 +2,7 @@
   <BasicModal
     v-bind="$attrs"
     centered
+    destroyOnClose
     :maskClosable="false"
     @register="registerModal"
     title="播放器"
@@ -78,7 +79,7 @@
         <!-- 云台控制 -->
         <PlayPTZ :deviceId="stats.deviceId" :channelId="stats.channelId" :controSpeed="stats.controSpeed"/>
         <!-- 流信息 -->
-        <PlayStream :tracks="stats.tracks"/>
+        <PlayStream :app="stats.app" :stream="stats.stream" :mediaServerId="stats.mediaServerId"/>
       </div>
     </div>
   </BasicModal>

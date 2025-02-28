@@ -15,7 +15,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { reactive } from 'vue';
   import { doWiper } from '@/api/video/ptz';
   import {
     Button

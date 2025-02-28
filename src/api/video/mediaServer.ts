@@ -12,6 +12,8 @@ enum Api {
   doMediaRemove = '/webapi/video/media/server/remove',
   //根据应用名和流id获取播放地址
   doMediaFindPlayUrl = '/webapi/video/media/server/find_play_url',
+  //根据应用名和流id获取播放地址
+  doMediaInfo = '/webapi/video/media/server/find_media_info',
 }
 
 export function doMediaPage(params: MediaServerParams) {
@@ -31,4 +33,7 @@ export function doMediaRemove(params: Recordable) {
 }
 export function doMediaFindPlayUrl(params: Recordable) {
   return defHttp.get({ url: Api.doMediaFindPlayUrl, params });
+}
+export function doMediaInfo(params: Recordable) {
+  return defHttp.get({ url: Api.doMediaInfo, params });
 }
