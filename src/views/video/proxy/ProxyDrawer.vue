@@ -149,7 +149,7 @@
         span: 12,
       },
       componentProps: {
-        options: proxyTypes,
+        options: proxyTypes as any,
       },
       defaultValue: 1,
       required: true,
@@ -162,7 +162,7 @@
         span: 12,
       },
       componentProps: {
-        options: proxyRtpTypes,
+        options: proxyRtpTypes as any,
       },
       defaultValue: 1,
       required: true,

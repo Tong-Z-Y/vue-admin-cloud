@@ -4,7 +4,7 @@
     centered
     :wrapClassName="`${prefixCls}`"
     :closable="false"
-    :closeIcon="false"
+    :closeIcon="undefined"
     :footer="null"
     :width="250"
     :minHeight="250"

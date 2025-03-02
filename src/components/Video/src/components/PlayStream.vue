@@ -81,11 +81,16 @@
     return info as any;
   });
 
-  const findMediaInfo = async () => {
-    stats.data = await doMediaInfo({
+  const findMediaInfo = () => {
+    doMediaInfo({
       app: props.app,
       stream: props.stream,
       mediaServerId: props.mediaServerId,
+    }).then((res) => {
+      stats.data = res.data;
+    }).catch(() => {
+      stats.data = {};
+      stopTask();
     });
   };
 
